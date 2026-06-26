@@ -2,10 +2,20 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+import gdown
+import os
+
+# Download similarity.pkl from Google Drive if not present
+if not os.path.exists('similarity.pkl'):
+    with st.spinner('Downloading model data, please wait...'):
+        gdown.download(
+            'https://drive.google.com/uc?id=1zRGkhAQ7kb57B2Wz9UJ5QLT-ecg-lVQC',
+            'similarity.pkl',
+            quiet=False
+        )
 
 movies_dict = pickle.load(open('movies_dict.pkl', 'rb'))
-movies = pd.DataFrame(movies_dict).reset_index(drop=True)  # ensures positional index is clean
-
+movies = pd.DataFrame(movies_dict).reset_index(drop=True)
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
 st.title('Movie Recommender System')
@@ -27,9 +37,8 @@ def recommend(movie):
     recommended_movies = []
     recommended_movies_posters = []
     for i in movie_list:
-        movie_id = movies.iloc[i[0]].movie_id          # TMDB ID for the poster API
-
-        recommended_movies.append(movies.iloc[i[0]].title)   # i[0] is the DataFrame position
+        movie_id = movies.iloc[i[0]].movie_id
+        recommended_movies.append(movies.iloc[i[0]].title)
         recommended_movies_posters.append(fetch_poster(movie_id))
 
     return recommended_movies, recommended_movies_posters
@@ -62,4 +71,4 @@ if st.button("Recommend"):
 
     with col5:
         st.text(names[4])
-        st.image(posters[4])   # also added the missing poster for col5
+        st.image(posters[4])
